@@ -1,0 +1,84 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-emerald-accent: var(--emerald-accent);
+  --color-emerald-border: var(--emerald-border);
+  --color-gold: var(--gold);
+  --color-glass-bg: var(--glass-bg);
+  --color-glass-hover: var(--glass-hover);
+  --color-glass-border: var(--glass-border);
+
+  --font-sans: var(--font-inter);
+}
+
+@layer base {
+  :root {
+    --background: #f1f5f9; /* slate-100 */
+    --foreground: #022c22; /* emerald-950 */
+    --card: #ffffff;
+    --emerald-accent: #059669; /* emerald-600 */
+    --emerald-border: rgba(5, 150, 105, 0.2);
+    --gold: #d97706; /* amber-600 */
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-hover: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(5, 150, 105, 0.15);
+  }
+
+  .dark {
+    --background: #030712; /* gray-950 */
+    --foreground: #f8fafc;
+    --card: #111827; /* gray-900 */
+    --emerald-accent: #10b981;
+    --emerald-border: rgba(16, 185, 129, 0.2);
+    --gold: #fef08a; /* yellow-200 */
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-hover: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(16, 185, 129, 0.1);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Glassmorphism utilities */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-panel {
+  background: var(--card);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+}
+
+.dark .glass-panel {
+  background: rgba(16, 185, 129, 0.03);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+/* Custom scrollbar for webkit to keep it clean */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--emerald-border);
+  border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--emerald-accent);
+}
