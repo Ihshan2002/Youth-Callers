@@ -6,6 +6,19 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
+type ProblemWithSolutions = {
+  solutions?: { created_at?: string }[] | null;
+};
+
+function sortSolutions<T extends ProblemWithSolutions>(problems: T[] | null) {
+  return (problems || []).map((problem) => ({
+    ...problem,
+    solutions: [...(problem.solutions || [])].sort((a, b) =>
+      String(a.created_at || '').localeCompare(String(b.created_at || ''))
+    ),
+  }));
+}
+
 export async function GET() {
   try {
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -18,7 +31,7 @@ export async function GET() {
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true, data: sortSolutions(data) });
   } catch (error) {
     console.error('Fetch problems error:', error);
     return NextResponse.json({ error: 'Failed to fetch problems' }, { status: 500 });

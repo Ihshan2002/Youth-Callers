@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     let audio_url = null;
     if (audioFile && audioFile.size > 0) {
       const fileName = `${problemId}-${Date.now()}.webm`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('audio_submissions')
         .upload(fileName, audioFile, {
           contentType: 'audio/webm'

@@ -5,7 +5,7 @@ import { ThemeToggle } from "../ui/ThemeToggle";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function AdminLogin({ onLogin }: { onLogin: () => void }) {
+export function AdminLogin({ onLogin }: { onLogin: (name: string) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,8 +18,11 @@ export function AdminLogin({ onLogin }: { onLogin: () => void }) {
 
     await new Promise((resolve) => setTimeout(resolve, 600));
 
-    if (email === "scholor@youthcallers.com" && password === "youthcallers123") {
-      onLogin();
+    const normalizedEmail = email.trim().toLowerCase();
+    const allowedEmail = normalizedEmail === "scholar@youthcallers.com" || normalizedEmail === "scholor@youthcallers.com";
+
+    if (allowedEmail && password === "youthcallers123") {
+      onLogin("Youth Callers Scholar");
     } else {
       setError("Invalid credentials. Please contact administration.");
       setIsLoading(false);
@@ -48,7 +51,7 @@ export function AdminLogin({ onLogin }: { onLogin: () => void }) {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="w-full px-3 py-2 rounded-md bg-background border border-border focus:border-foreground focus:ring-1 focus:ring-foreground outline-none transition-all text-sm"
-                placeholder="scholor@youthcallers.com"
+                placeholder="scholar@youthcallers.com"
               />
             </div>
 

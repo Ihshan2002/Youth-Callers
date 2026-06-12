@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-interface BentoCardProps extends React.HTMLAttributes<HTMLDivElement> {}
+type BentoCardProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function BentoCard({ className, children, ...props }: BentoCardProps) {
   return (

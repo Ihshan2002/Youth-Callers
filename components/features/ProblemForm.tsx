@@ -39,7 +39,7 @@ export function ProblemForm() {
 
       if (!res.ok) throw new Error("Failed to submit");
       setIsSuccess(true);
-    } catch (err: any) {
+    } catch {
       setError("System error. Please try again.");
     } finally {
       setIsSubmitting(false);

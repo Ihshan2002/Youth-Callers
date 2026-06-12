@@ -1,20 +1,30 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { getAnonymousUserId } from "@/lib/user-session";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { BentoCard } from "@/components/ui/BentoCard";
 import {
-  ArrowLeft, Clock, CheckCircle2, Mic, FileText,
-  RefreshCw, Loader2, MessageSquare, AlertCircle
+  AlertCircle,
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Loader2,
+  MessageSquare,
+  Mic,
+  RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 type Solution = {
   id: string;
-  text_content: string;
+  text_content: string | null;
+  audio_url: string | null;
+  scholar_name: string | null;
   created_at: string;
+  updated_at?: string | null;
 };
 
 type Problem = {
@@ -56,7 +66,7 @@ export default function MyProblems() {
   }, []);
 
   useEffect(() => {
-    fetchProblems();
+    void Promise.resolve().then(() => fetchProblems());
   }, [fetchProblems]);
 
   const answeredCount = problems.filter((p) => p.status === "answered").length;
@@ -64,7 +74,6 @@ export default function MyProblems() {
 
   return (
     <main className="min-h-screen bg-background text-foreground font-sans">
-      {/* Header */}
       <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-3xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link
@@ -91,7 +100,6 @@ export default function MyProblems() {
       </header>
 
       <div className="max-w-3xl mx-auto px-6 py-10 flex flex-col gap-8">
-        {/* Page Title */}
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Your Submitted Queries</h2>
           <p className="text-sm text-muted-foreground mt-1.5 leading-relaxed">
@@ -100,7 +108,6 @@ export default function MyProblems() {
           </p>
         </div>
 
-        {/* Stats bar */}
         {!isLoading && problems.length > 0 && (
           <div className="grid grid-cols-3 gap-3">
             <div className="p-3 rounded-lg border border-border bg-card text-center">
@@ -118,7 +125,6 @@ export default function MyProblems() {
           </div>
         )}
 
-        {/* Content */}
         {isLoading ? (
           <div className="py-16 flex flex-col items-center gap-3">
             <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
@@ -153,7 +159,6 @@ export default function MyProblems() {
           <div className="flex flex-col gap-5">
             {problems.map((problem) => (
               <BentoCard key={problem.id} className="flex flex-col overflow-hidden p-0">
-                {/* Problem header */}
                 <div className="p-4 border-b border-border bg-card/50 flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2">
                     <span
@@ -173,7 +178,9 @@ export default function MyProblems() {
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {new Date(problem.created_at).toLocaleDateString([], {
-                        year: "numeric", month: "short", day: "numeric"
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
                       })}
                     </span>
                   </div>
@@ -183,17 +190,15 @@ export default function MyProblems() {
                 </div>
 
                 <div className="p-5 flex flex-col gap-5">
-                  {/* Your query */}
                   <div>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">
                       Your Query
                     </h4>
-                    {problem.text_content && (
+                    {problem.text_content ? (
                       <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
                         {problem.text_content}
                       </p>
-                    )}
-                    {!problem.text_content && (
+                    ) : (
                       <p className="text-xs text-muted-foreground italic">Voice note only</p>
                     )}
                     {problem.audio_url && (
@@ -206,7 +211,6 @@ export default function MyProblems() {
                     )}
                   </div>
 
-                  {/* Scholar responses */}
                   {problem.solutions && problem.solutions.length > 0 ? (
                     <div className="border-t border-border pt-5">
                       <h4 className="text-[10px] font-bold uppercase tracking-widest text-emerald-700 dark:text-emerald-400 mb-3 flex items-center gap-1.5">
@@ -219,14 +223,26 @@ export default function MyProblems() {
                             key={sol.id}
                             className="p-4 rounded-lg bg-emerald-500/5 border border-emerald-500/20"
                           >
-                            {problem.solutions.length > 1 && (
-                              <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
-                                Response #{idx + 1} · {new Date(sol.created_at).toLocaleDateString()}
+                            <p className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400 mb-2">
+                              Response #{idx + 1} by {sol.scholar_name || "Youth Callers Scholar"}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground mb-3">
+                              {new Date(sol.created_at).toLocaleString()}
+                              {sol.updated_at && sol.updated_at !== sol.created_at ? " - edited" : ""}
+                            </p>
+                            {sol.text_content && (
+                              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
+                                {sol.text_content}
                               </p>
                             )}
-                            <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                              {sol.text_content}
-                            </p>
+                            {sol.audio_url && (
+                              <div className="mt-3 p-3 bg-background/70 rounded-md border border-emerald-500/10">
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+                                  <Mic className="w-3 h-3" /> Voice Response
+                                </p>
+                                <audio controls className="h-9 w-full max-w-xs" src={sol.audio_url} />
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>
@@ -239,7 +255,7 @@ export default function MyProblems() {
                           <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "150ms" }} />
                           <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40 animate-bounce" style={{ animationDelay: "300ms" }} />
                         </div>
-                        Awaiting scholar response — usually within 24 hours
+                        Awaiting scholar response - usually within 24 hours
                       </div>
                     </div>
                   ) : null}

@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Mic, Square, Trash2, Send } from "lucide-react";
+import { Mic, Square, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface AudioRecorderProps {
-  onAudioReady: (blob: Blob) => void;
+  onAudioReady: (blob: Blob | null) => void;
   className?: string;
 }
 
 export function AudioRecorder({ onAudioReady, className }: AudioRecorderProps) {
   const [isRecording, setIsRecording] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -29,8 +28,16 @@ export function AudioRecorder({ onAudioReady, className }: AudioRecorderProps) {
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
 
+      const AudioContextConstructor =
+        window.AudioContext ||
+        (window as Window & typeof globalThis & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+
+      if (!AudioContextConstructor) {
+        throw new Error("AudioContext is not supported in this browser.");
+      }
+
       // Setup Web Audio API for visualizer
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new AudioContextConstructor();
       audioContextRef.current = audioContext;
       const analyser = audioContext.createAnalyser();
       analyser.fftSize = 64;
@@ -44,7 +51,6 @@ export function AudioRecorder({ onAudioReady, className }: AudioRecorderProps) {
 
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        setAudioBlob(blob);
         setAudioUrl(URL.createObjectURL(blob));
         onAudioReady(blob);
         
@@ -71,11 +77,11 @@ export function AudioRecorder({ onAudioReady, className }: AudioRecorderProps) {
   };
 
   const clearAudio = () => {
-    setAudioBlob(null);
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
       setAudioUrl(null);
     }
+    onAudioReady(null);
   };
 
   const drawVisualizer = () => {
@@ -148,6 +154,7 @@ export function AudioRecorder({ onAudioReady, className }: AudioRecorderProps) {
           </AnimatePresence>
           
           <button
+            type="button"
             onClick={isRecording ? stopRecording : startRecording}
             className={cn(
               "relative z-10 flex items-center justify-center w-16 h-16 rounded-full transition-all duration-300 shadow-xl",
@@ -177,6 +184,7 @@ export function AudioRecorder({ onAudioReady, className }: AudioRecorderProps) {
         >
           <audio src={audioUrl} controls className="flex-1 h-10 w-full rounded-lg" />
           <button
+            type="button"
             onClick={clearAudio}
             className="p-2 rounded-full text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
             title="Delete Recording"

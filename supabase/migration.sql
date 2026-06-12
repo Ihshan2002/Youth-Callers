@@ -6,6 +6,11 @@
 -- 1. Add user_id column if it doesn't exist yet
 alter table public.anonymous_problems add column if not exists user_id text;
 
+-- 1b. Add reply metadata needed for two-way scholar responses
+alter table public.solutions add column if not exists scholar_name text default 'Youth Callers Scholar';
+alter table public.solutions add column if not exists audio_url text;
+alter table public.solutions add column if not exists updated_at timestamp with time zone default timezone('utc'::text, now()) not null;
+
 -- 2. Create notifications table if it doesn't exist yet
 create table if not exists public.notifications (
   id uuid default uuid_generate_v4() primary key,
@@ -48,6 +53,12 @@ create policy "Anyone can view solutions" on public.solutions
 -- Allow scholars to insert solutions via API
 create policy "Server can insert solutions" on public.solutions
   for insert with check (true);
+
+create policy "Server can update solutions" on public.solutions
+  for update using (true) with check (true);
+
+create policy "Server can delete solutions" on public.solutions
+  for delete using (true);
 
 -- 6. Fix notifications policies
 drop policy if exists "Public can insert notifications" on public.notifications;

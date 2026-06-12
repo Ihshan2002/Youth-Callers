@@ -26,9 +26,11 @@ create table public.solutions (
   id uuid default uuid_generate_v4() primary key,
   problem_id uuid references public.anonymous_problems(id) on delete cascade,
   admin_id uuid references auth.users(id),
+  scholar_name text default 'Youth Callers Scholar',
   text_content text,
   audio_url text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
 -- Table: media_board
